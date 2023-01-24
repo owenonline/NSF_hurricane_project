@@ -3,13 +3,11 @@ import pandas as pd
 import numpy as np
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms, utils
-from skimage import io, transform
 from PIL import Image
 import glob
 import os
 from PIL import ImageFile
 from sklearn.utils.class_weight import compute_class_weight
-import torchsample as ts
 from torchvision.io import read_image
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True

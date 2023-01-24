@@ -1,4 +1,5 @@
 import torch
+import sys
 from data_loader import DisasterDataset
 from torch.utils.data import DataLoader
 from torchvision.models import resnet, mobilenet
@@ -8,10 +9,21 @@ from torch import nn
 epochs = 100
 
 # ===========================
-res_mod = resnet.resnet18(weights=resnet.ResNet18_Weights.DEFAULT)
-num_ftrs = res_mod.fc.in_features
-res_mod.fc = nn.Linear(num_ftrs, 7)
-model = res_mod
+if sys.argv[1] == "resnet":
+   res_mod = resnet.resnet18(weights=resnet.ResNet18_Weights.DEFAULT)
+   num_ftrs = res_mod.fc.in_features
+   res_mod.fc = nn.Linear(num_ftrs, 7)
+   model = res_mod
+elif sys.argv[1] == "mobilenet":
+   res_mod = mobilenet.mobilenet_v2(weights=mobilenet.MobileNet_V2_Weights.DEFAULT)
+   num_ftrs = res_mod.fc.in_features
+   res_mod.fc = nn.Linear(num_ftrs, 7)
+   model = res_mod
+elif sys.argv[1] == "resnext":
+   res_mod = resnet.resnext101_64x4d(weights=resnet.ResNeXt101_64X4D_Weights.DEFAULT)
+   num_ftrs = res_mod.fc.in_features
+   res_mod.fc = nn.Linear(num_ftrs, 7)
+   model = res_mod
 
 model = model.cuda()
 model = nn.DataParallel(model)
@@ -73,7 +85,7 @@ for ep in range(epochs):
          preds = model(img)
          correct += (torch.argmax(preds,1)==label).sum()
       best_test_acc = correct/len(test_set)
-   with open('output_single.txt','a') as f:
+   with open('out/output_single_{}.txt'.format(sys.argv[1]),'a') as f:
       curr_lr = [group['lr'] for group in lr_scheduler.optimizer.param_groups][0]
       f.write('test:'+str(best_test_acc) + '_val:'+str(val_acc)+ '_train:'+str(train_acc)+'_lr:'+str(curr_lr)+'\n')
    lr_scheduler.step(val_acc)

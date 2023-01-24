@@ -1,11 +1,11 @@
 import torch
 from data_loader_multi_task2 import DisasterDataset
 from torch.utils.data import DataLoader
-from torchvision.models import resnet
+from torchvision.models import resnet, mobilenet
+import sys
 from torch import nn
 from tqdm import tqdm
 from gsam import GSAM, LinearScheduler
-from adabelief_pytorch import AdaBelief
 
 #import resnet_example
 
@@ -27,10 +27,21 @@ for task in tasks:
    dev_loader = DataLoader(dev_set, batch_size=4,pin_memory=True, num_workers=8)
 
    # import pdb; pdb.set_trace()
-   res_mod = resnet.resnet18(pretrained=True)
-   num_ftrs = res_mod.fc.in_features
-   res_mod.fc = nn.Linear(num_ftrs, len(train_set.label_2_id[task]))
-   model = res_mod
+   if sys.argv[1] == "resnet":
+      res_mod = resnet.resnet18(weights=resnet.ResNet18_Weights.DEFAULT)
+      num_ftrs = res_mod.fc.in_features
+      res_mod.fc = nn.Linear(num_ftrs, 7)
+      model = res_mod
+   elif sys.argv[1] == "mobilenet":
+      res_mod = mobilenet.mobilenet_v2(weights=mobilenet.MobileNet_V2_Weights.DEFAULT)
+      num_ftrs = res_mod.fc.in_features
+      res_mod.fc = nn.Linear(num_ftrs, 7)
+      model = res_mod
+   elif sys.argv[1] == "resnext":
+      res_mod = resnet.resnext101_64x4d(weights=resnet.ResNeXt101_64X4D_Weights.DEFAULT)
+      num_ftrs = res_mod.fc.in_features
+      res_mod.fc = nn.Linear(num_ftrs, 7)
+      model = res_mod
 
    model = model.cuda()
    model = nn.DataParallel(model)
@@ -92,7 +103,7 @@ for task in tasks:
                preds = model(img)
                correct += (torch.argmax(preds,1)==label).sum()
             best_test_acc = correct/len(test_set)
-         with open('output.txt','a') as f:
+         with open('out/output_multi_{}.txt'.format(sys.argv[1]),'a') as f:
             curr_lr = [group['lr'] for group in lr_scheduler.optimizer.param_groups][0]
             f.write(task+'epoch: '+str(ep) + '_test:'+str(best_test_acc) + '_val:'+str(val_acc)+ '_train:'+str(train_acc)+'_lr:'+str(curr_lr)+'\n')
       lr_scheduler.step(val_acc)

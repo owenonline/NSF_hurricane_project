@@ -35,7 +35,7 @@ dev_loader = DataLoader(dev_set, batch_size=4, num_workers = 8, pin_memory=True)
 
 best_val_acc, best_test_acc = 0.0, 0.0
 
-import pdb; pdb.set_trace()
+# import pdb; pdb.set_trace()
 for ep in range(epochs):
    print(ep)
    correct = 0

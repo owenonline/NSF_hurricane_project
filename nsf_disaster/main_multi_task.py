@@ -12,7 +12,8 @@ from gsam import GSAM, LinearScheduler
 # ===========================
 epochs = 100
 
-tasks = ['disaster_types','damage_severity','humanitarian','informative']
+# tasks = ['disaster_types','damage_severity','humanitarian','informative']
+tasks = ['humanitarian','informative']
 # tasks = ['disaster_types']
 for task in tasks:
 

@@ -60,8 +60,8 @@ for task in tasks:
 
    criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
 
-   # optimizer = torch.optim.AdamW (model.parameters(),lr=1e-3, weight_decay=1e-1)
-   optimizer = torch.optim.AdamW (model.parameters(),lr=1e-5, weight_decay=1e-2)
+   optimizer = torch.optim.AdamW (model.parameters(),lr=1e-3, weight_decay=1e-1)
+   # optimizer = torch.optim.AdamW (model.parameters(),lr=1e-5, weight_decay=1e-2)
 
    # rho_max, rho_min, alpha, label_smoothing = 2.0, 2.0, 0.2, 0.1
    rho_max, rho_min, alpha, label_smoothing = 2.0, 2.0, 0.2, 0.1

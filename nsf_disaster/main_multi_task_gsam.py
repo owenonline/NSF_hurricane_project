@@ -93,7 +93,7 @@ for task in tasks:
          with torch.no_grad():
             correct += (torch.argmax(preds,1)==label).sum()
             # log(model, loss.cpu().repeat(args.batch_size), correct.cpu(), scheduler.lr())
-            lr_scheduler.step()
+            lr_scheduler.step(loss)
             gsam_optimizer.update_rho_t()
 
       train_acc = correct/len(train_set)

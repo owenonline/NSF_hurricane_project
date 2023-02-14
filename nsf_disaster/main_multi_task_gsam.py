@@ -65,11 +65,11 @@ for task in tasks:
 
    # rho_max, rho_min, alpha, label_smoothing = 2.0, 2.0, 0.2, 0.1
    rho_max, rho_min, alpha, label_smoothing = 2.0, 2.0, 0.2, 0.1
-   lr_scheduler = LinearScheduler(T_max=epochs*len(train_loader), max_value=1e-5, min_value=1e-5*0.01, optimizer=optimizer)
+   # lr_scheduler = LinearScheduler(T_max=epochs*len(train_loader), max_value=1e-5, min_value=1e-5*0.01, optimizer=optimizer)
    rho_scheduler = LinearScheduler(T_max=epochs*len(train_loader), max_value=rho_max, min_value=rho_min)
    gsam_optimizer = GSAM(params=model.parameters(), base_optimizer=optimizer, model=model, gsam_alpha=alpha, rho_scheduler=rho_scheduler, adaptive=True)
 
-   # lr_scheduler  = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max',patience=10)
+   lr_scheduler  = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max',patience=10)
    # import pdb; pdb.set_trace()
 
    best_val_acc, best_test_acc =  .0, .0

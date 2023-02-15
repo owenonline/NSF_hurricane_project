@@ -60,8 +60,8 @@ for task in tasks:
 
    criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
 
-   optimizer = torch.optim.AdamW (model.parameters(),lr=1e-3, weight_decay=1e-1)
-   # optimizer = torch.optim.AdamW (model.parameters(),lr=1e-5, weight_decay=1e-2)
+   # optimizer = torch.optim.AdamW (model.parameters(),lr=1e-3, weight_decay=1e-1)
+   optimizer = torch.optim.AdamW (model.parameters(),lr=1e-5, weight_decay=1e-2)
 
    # rho_max, rho_min, alpha, label_smoothing = 2.0, 2.0, 0.2, 0.1
    rho_max, rho_min, alpha, label_smoothing = 2.0, 2.0, 0.2, 0.1
@@ -118,7 +118,7 @@ for task in tasks:
                preds = model(img)
                correct += (torch.argmax(preds,1)==label).sum()
             best_test_acc = correct/len(test_set)
-         with open('out/output_balanced_gsam_{}.txt'.format(sys.argv[1]),'a') as f:
+         with open('out/output_balanced_gsam_newparams_{}.txt'.format(sys.argv[1]),'a') as f:
             curr_lr = [group['lr'] for group in lr_scheduler.optimizer.param_groups][0]
             f.write(task +'_epoch: '+str(ep) + '_test:'+str(best_test_acc) + '_val:'+str(val_acc)+ '_train:'+str(train_acc)+'_lr:'+str(curr_lr)+'\n')
          # lr_scheduler.step(val_acc)

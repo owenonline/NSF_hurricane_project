@@ -21,9 +21,9 @@ def smooth_crossentropy(pred, gold, smoothing=0.1):
 # ===========================
 epochs = 100
 
-tasks = ['disaster_types','damage_severity','humanitarian','informative']
+# tasks = ['disaster_types','damage_severity','humanitarian','informative']
 # tasks = ['humanitarian','informative']
-# tasks = ['disaster_types']
+tasks = ['disaster_types']
 for task in tasks:
 
    train_set = DisasterDataset(task = task,split='train')
@@ -56,18 +56,34 @@ for task in tasks:
    # ===========================
    class_weights = torch.FloatTensor(train_set.class_weights).cuda()
 
-   criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
+   if sys.argv[2] == 1:
+      criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
+   elif sys.argv[2] == 0:
+      criterion = torch.nn.CrossEntropyLoss()
 
-   # optimizer = torch.optim.AdamW (model.parameters(),lr=1e-3, weight_decay=1e-1)
-   optimizer = torch.optim.AdamW (model.parameters(), lr=1e-5, weight_decay=1e-2)
+   if sys.argv[3] == 0:
+      optimizer = torch.optim.AdamW (model.parameters(), lr=1e-5, weight_decay=1e-3)
+   elif sys.argv[3] == 1:
+      optimizer = torch.optim.AdamW (model.parameters(),lr=1e-3, weight_decay=1e-1)
+   elif sys.argv[3] == 2:
+      optimizer = torch.optim.AdamW (model.parameters(), lr=1e-5, weight_decay=1e-2)
+   elif sys.argv[3] == 3:
+      optimizer = torch.optim.SGD(model.parameters(),lr=1e-2)
+   elif sys.argv[3] == 4:
+      optimizer = torch.optim.Adam(model.parameters(),lr=1e-5, weight_decay=1e-3)
 
    # rho_max, rho_min, alpha, label_smoothing = 2.0, 2.0, 0.2, 0.1
    rho_max, rho_min, alpha, label_smoothing = 2.0, 2.0, 0.2, 0.1
-   lr_scheduler = LinearScheduler(T_max=epochs*len(train_loader), max_value=1e-5, min_value=1e-5*0.01, optimizer=optimizer)
    rho_scheduler = LinearScheduler(T_max=epochs*len(train_loader), max_value=rho_max, min_value=rho_min)
    gsam_optimizer = GSAM(params=model.parameters(), base_optimizer=optimizer, model=model, gsam_alpha=alpha, rho_scheduler=rho_scheduler, adaptive=True)
 
-   # lr_scheduler  = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max',patience=10)
+   if sys.argv[4] == 0:
+      lr_scheduler = LinearScheduler(T_max=100*len(train_loader), max_value=1e-3, min_value=1e-5*0.01, optimizer=optimizer)
+   elif sys.argv[4] == 1:
+      lr_scheduler = LinearScheduler(T_max=epochs*len(train_loader), max_value=1e-5, min_value=1e-5*0.01, optimizer=optimizer)
+   elif sys.argv[4] == 2:
+      lr_scheduler  = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max',patience=10)
+
    # import pdb; pdb.set_trace()
    best_val_acc, best_test_acc =  .0, .0
    for ep in range(epochs):
@@ -90,7 +106,10 @@ for task in tasks:
          with torch.no_grad():
             correct += (torch.argmax(preds,1)==label).sum()
             # log(model, loss.cpu().repeat(args.batch_size), correct.cpu(), scheduler.lr())
-            lr_scheduler.step(loss)
+            if sys.argv[4] == 2:
+               lr_scheduler.step(loss)
+            else:
+               lr_scheduler.step()
             gsam_optimizer.update_rho_t()
 
       train_acc = correct/len(train_set)

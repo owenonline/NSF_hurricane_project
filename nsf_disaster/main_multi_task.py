@@ -12,9 +12,9 @@ from gsam import GSAM, LinearScheduler
 # ===========================
 epochs = 100
 
-tasks = ['disaster_types','damage_severity','humanitarian','informative']
+# tasks = ['disaster_types','damage_severity','humanitarian','informative']
 # tasks = ['humanitarian','informative']
-# tasks = ['disaster_types']
+tasks = ['disaster_types']
 for task in tasks:
 
    train_set = DisasterDataset(task = task,split='train')
@@ -47,14 +47,29 @@ for task in tasks:
    # ===========================
    class_weights = torch.FloatTensor(train_set.class_weights).cuda()
 
-   criterion = torch.nn.CrossEntropyLoss()
+   if sys.argv[2] == 1:
+      criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
+   elif sys.argv[2] == 0:
+      criterion = torch.nn.CrossEntropyLoss()
 
-   # optimizer = torch.optim.AdamW (model.parameters(),lr=1e-3, weight_decay=1e-1)
-   optimizer = torch.optim.AdamW (model.parameters(), lr=1e-5, weight_decay=1e-3)
-   # optimizer = AdaBelief (model.parameters(),lr=1e-5, weight_decay=1e-3,rectify=False)
+   if sys.argv[3] == 0:
+      optimizer = torch.optim.AdamW (model.parameters(), lr=1e-5, weight_decay=1e-3)
+   elif sys.argv[3] == 1:
+      optimizer = torch.optim.AdamW (model.parameters(),lr=1e-3, weight_decay=1e-1)
+   elif sys.argv[3] == 2:
+      optimizer = torch.optim.AdamW (model.parameters(), lr=1e-5, weight_decay=1e-2)
+   elif sys.argv[3] == 3:
+      optimizer = torch.optim.SGD(model.parameters(),lr=1e-2)
+   elif sys.argv[3] == 4:
+      optimizer = torch.optim.Adam(model.parameters(),lr=1e-5, weight_decay=1e-3)
 
-   # lr_scheduler = LinearScheduler(T_max=100*len(train_loader), max_value=1e-3, min_value=1e-5*0.01, optimizer=optimizer)
-   lr_scheduler  = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max',patience=10)
+   if sys.argv[4] == 0:
+      lr_scheduler = LinearScheduler(T_max=100*len(train_loader), max_value=1e-3, min_value=1e-5*0.01, optimizer=optimizer)
+   elif sys.argv[4] == 1:
+      lr_scheduler = LinearScheduler(T_max=epochs*len(train_loader), max_value=1e-5, min_value=1e-5*0.01, optimizer=optimizer)
+   elif sys.argv[4] == 2:
+      lr_scheduler  = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max',patience=10)
+
    # import pdb; pdb.set_trace()
    best_val_acc, best_test_acc =  .0, .0
    for ep in range(epochs):
@@ -103,6 +118,9 @@ for task in tasks:
          with open('out/output_multi_{}.txt'.format(sys.argv[1]),'a') as f:
             curr_lr = [group['lr'] for group in lr_scheduler.optimizer.param_groups][0]
             f.write(task+'epoch: '+str(ep) + '_test:'+str(best_test_acc) + '_val:'+str(val_acc)+ '_train:'+str(train_acc)+'_lr:'+str(curr_lr)+'\n')
-      lr_scheduler.step(val_acc)
+      if sys.argv[4] == 2:
+         lr_scheduler.step(val_acc)
+      else:
+         lr_scheduler.step()
       
 

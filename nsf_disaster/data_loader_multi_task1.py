@@ -1,56 +1,15 @@
 import torch
 import pandas as pd
 import numpy as np
-from torch.utils.data import DataLoader, Dataset
-from torchvision import transforms, utils
-from skimage import io, transform
+from torch.utils.data import Dataset
+from torchvision import transforms
 from PIL import Image
 import glob
 import os
 from PIL import ImageFile
 from sklearn.utils.class_weight import compute_class_weight
-import torchsample as ts
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-
-
-# read csv files
-# train_csv_type = 'crisis_vision_benchmarks/' \
-#             'tasks/disaster_types/consolidated/consolidated_disaster_types_train_final.tsv'
-# test_csv_type = 'crisis_vision_benchmarks/' \
-#             'tasks/disaster_types/consolidated/consolidated_disaster_types_test_final.tsv'
-# dev_csv_type = 'crisis_vision_benchmarks/' \
-#             'tasks/disaster_types/consolidated/consolidated_disaster_types_dev_final.tsv'
-
-# train_csv_damage = 'crisis_vision_benchmarks/' \
-#             'tasks/damage_severity/consolidated/consolidated_damage_train_final.tsv'
-# test_csv_damage = 'crisis_vision_benchmarks/' \
-#             'tasks/damage_severity/consolidated/consolidated_damage_test_final.tsv'
-# dev_csv_damage = 'crisis_vision_benchmarks/' \
-#             'tasks/damage_severity/consolidated/consolidated_damage_dev_final.tsv'
-
-# train_csv_humanitarian = 'crisis_vision_benchmarks/' \
-#             'tasks/humanitarian/consolidated/consolidated_hum_train_final.tsv'
-# test_csv_humanitarian = 'crisis_vision_benchmarks/' \
-#             'tasks/humanitarian/consolidated/consolidated_hum_test_final.tsv'
-# dev_csv_humanitarian = 'crisis_vision_benchmarks/' \
-#             'tasks/humanitarian/consolidated/consolidated_hum_dev_final.tsv'
-
-# train_csv_informative = 'crisis_vision_benchmarks/' \
-#             'tasks/informative/consolidated/consolidated_info_train_final.tsv'
-# test_csv_informative = 'crisis_vision_benchmarks/' \
-#             'tasks/informative/consolidated/consolidated_info_test_final.tsv'
-# dev_csv_informative = 'crisis_vision_benchmarks/' \
-#             'tasks/informative/consolidated/consolidated_info_dev_final.tsv'
-
-# phenotype = {
-#     'train': train_csv,
-#     'test': test_csv,
-#     'dev': dev_csv,
-# }
-
-# mapping label to id
-
 
 class DisasterDataset(Dataset):
     def __init__(self, task = 'disaster_types', split='train'):
@@ -104,9 +63,6 @@ class DisasterDataset(Dataset):
                 transforms.Resize(256),
                 transforms.RandomCrop(224),
                 transforms.PILToTensor(),
-                #ts.transforms.Rotate(20), # data augmentation: rotation 
-                #ts.transforms.Rotate(-20), # data augmentation: rotation
-                #transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
         else:
             self.transforms = transforms.Compose(
@@ -127,25 +83,19 @@ class DisasterDataset(Dataset):
         return int(self.phenotypes.shape[0])
 
     def __getitem__(self, idx):
-        # import pdb; pdb.set_trace()
         img_path = self.phenotypes['image_path'].iloc[idx]
         img_path = img_path.replace('/export/sc2/aidr/experiments/exp_crisisdps_image/','')
-        # try:
+
         image = Image.open('crisis_vision_benchmarks/{}'.format(img_path))
-        # except:
-            # print(img_path)
         
         image = self.transforms(image)
         image = image.float()
         image = image / 255.0
-        # try:
+
         if image.shape[0] >3:
             image = image[:3,:]
         
         image = image - self._mean
-        # except:
-        # print(image.shape)
-        # print(self._mean.shape)
         image = image / self._std
 
         type = self.phenotypes['class_label'].iloc[idx]

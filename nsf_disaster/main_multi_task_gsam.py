@@ -1,4 +1,3 @@
-from random import shuffle
 import torch
 from data_loader_multi_task2 import DisasterDataset
 from torch.utils.data import DataLoader
@@ -7,7 +6,6 @@ import sys
 from torch import nn
 from tqdm import tqdm
 from gsam import GSAM, LinearScheduler
-# from model.smooth_cross_entropy import smooth_crossentropy
 import torch.nn.functional as F
 
 def smooth_crossentropy(pred, gold, smoothing=0.1):
@@ -29,7 +27,7 @@ tasks = ['disaster_types','damage_severity','humanitarian','informative']
 for task in tasks:
 
    train_set = DisasterDataset(task = task,split='train')
-   train_loader = DataLoader(train_set, batch_size=64,pin_memory=True,shuffle=True, num_workers=8)
+   train_loader = DataLoader(train_set, batch_size=64, pin_memory=True, shuffle=True, num_workers=8)
 
 
    test_set = DisasterDataset(task = task,split='test')
@@ -61,22 +59,21 @@ for task in tasks:
    criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
 
    # optimizer = torch.optim.AdamW (model.parameters(),lr=1e-3, weight_decay=1e-1)
-   optimizer = torch.optim.AdamW (model.parameters(),lr=1e-5, weight_decay=1e-2)
+   optimizer = torch.optim.AdamW (model.parameters(), lr=1e-5, weight_decay=1e-2)
 
    # rho_max, rho_min, alpha, label_smoothing = 2.0, 2.0, 0.2, 0.1
    rho_max, rho_min, alpha, label_smoothing = 2.0, 2.0, 0.2, 0.1
-   # lr_scheduler = LinearScheduler(T_max=epochs*len(train_loader), max_value=1e-5, min_value=1e-5*0.01, optimizer=optimizer)
+   lr_scheduler = LinearScheduler(T_max=epochs*len(train_loader), max_value=1e-5, min_value=1e-5*0.01, optimizer=optimizer)
    rho_scheduler = LinearScheduler(T_max=epochs*len(train_loader), max_value=rho_max, min_value=rho_min)
    gsam_optimizer = GSAM(params=model.parameters(), base_optimizer=optimizer, model=model, gsam_alpha=alpha, rho_scheduler=rho_scheduler, adaptive=True)
 
-   lr_scheduler  = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max',patience=10)
+   # lr_scheduler  = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max',patience=10)
    # import pdb; pdb.set_trace()
-
    best_val_acc, best_test_acc =  .0, .0
    for ep in range(epochs):
       print(ep)
       correct = 0
-      model.train()     
+      model.train()
       for id, batch in tqdm(enumerate(train_loader)):
          img, label = batch
          label = label.long()
@@ -97,8 +94,8 @@ for task in tasks:
             gsam_optimizer.update_rho_t()
 
       train_acc = correct/len(train_set)
-      model.eval()  
-      with torch.no_grad():    
+      model.eval()
+      with torch.no_grad():
          correct = 0
          for id, batch in tqdm(enumerate(dev_loader)):
             img, label = batch
@@ -109,6 +106,7 @@ for task in tasks:
             correct += (torch.argmax(preds,1)==label).sum()
          val_acc = correct/len(dev_set)
          if val_acc > best_val_acc:
+            best_val_acc = val_acc # this was missing here originally
             correct = 0
             for id, batch in tqdm(enumerate(test_loader)):
                img, label = batch

@@ -12,13 +12,13 @@ from gsam import GSAM, LinearScheduler
 # ===========================
 epochs = 100
 
-tasks = ['damage_severity']#['disaster_types','humanitarian','informative']
+tasks = ['disaster_types','damage_severity','humanitarian','informative']
 # tasks = ['humanitarian','informative']
 # tasks = ['disaster_types']
 for task in tasks:
 
    train_set = DisasterDataset(task = task,split='train')
-   train_loader = DataLoader(train_set, batch_size=64,pin_memory=True, shuffle=True, num_workers=8)
+   train_loader = DataLoader(train_set, batch_size=64, pin_memory=True, shuffle=True, num_workers=8)
 
 
    test_set = DisasterDataset(task = task,split='test')
@@ -47,11 +47,10 @@ for task in tasks:
    # ===========================
    class_weights = torch.FloatTensor(train_set.class_weights).cuda()
 
-   # criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
    criterion = torch.nn.CrossEntropyLoss()
 
    # optimizer = torch.optim.AdamW (model.parameters(),lr=1e-3, weight_decay=1e-1)
-   optimizer = torch.optim.AdamW (model.parameters(),lr=1e-5, weight_decay=1e-3)
+   optimizer = torch.optim.AdamW (model.parameters(), lr=1e-5, weight_decay=1e-3)
    # optimizer = AdaBelief (model.parameters(),lr=1e-5, weight_decay=1e-3,rectify=False)
 
    # lr_scheduler = LinearScheduler(T_max=100*len(train_loader), max_value=1e-3, min_value=1e-5*0.01, optimizer=optimizer)
@@ -88,7 +87,6 @@ for task in tasks:
             img, label = img.cuda(), label.cuda()
 
             preds = model(img)
-            # import pdb; pdb.set_trace()
             correct += (torch.argmax(preds,1)==label).sum()
          val_acc = correct/len(dev_set)
          if val_acc > best_val_acc:

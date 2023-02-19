@@ -13,45 +13,6 @@ import torchsample as ts
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-
-# read csv files
-# train_csv_type = 'crisis_vision_benchmarks/' \
-#             'tasks/disaster_types/consolidated/consolidated_disaster_types_train_final.tsv'
-# test_csv_type = 'crisis_vision_benchmarks/' \
-#             'tasks/disaster_types/consolidated/consolidated_disaster_types_test_final.tsv'
-# dev_csv_type = 'crisis_vision_benchmarks/' \
-#             'tasks/disaster_types/consolidated/consolidated_disaster_types_dev_final.tsv'
-
-# train_csv_damage = 'crisis_vision_benchmarks/' \
-#             'tasks/damage_severity/consolidated/consolidated_damage_train_final.tsv'
-# test_csv_damage = 'crisis_vision_benchmarks/' \
-#             'tasks/damage_severity/consolidated/consolidated_damage_test_final.tsv'
-# dev_csv_damage = 'crisis_vision_benchmarks/' \
-#             'tasks/damage_severity/consolidated/consolidated_damage_dev_final.tsv'
-
-# train_csv_humanitarian = 'crisis_vision_benchmarks/' \
-#             'tasks/humanitarian/consolidated/consolidated_hum_train_final.tsv'
-# test_csv_humanitarian = 'crisis_vision_benchmarks/' \
-#             'tasks/humanitarian/consolidated/consolidated_hum_test_final.tsv'
-# dev_csv_humanitarian = 'crisis_vision_benchmarks/' \
-#             'tasks/humanitarian/consolidated/consolidated_hum_dev_final.tsv'
-
-# train_csv_informative = 'crisis_vision_benchmarks/' \
-#             'tasks/informative/consolidated/consolidated_info_train_final.tsv'
-# test_csv_informative = 'crisis_vision_benchmarks/' \
-#             'tasks/informative/consolidated/consolidated_info_test_final.tsv'
-# dev_csv_informative = 'crisis_vision_benchmarks/' \
-#             'tasks/informative/consolidated/consolidated_info_dev_final.tsv'
-
-# phenotype = {
-#     'train': train_csv,
-#     'test': test_csv,
-#     'dev': dev_csv,
-# }
-
-# mapping label to id
-
-
 class DisasterDataset(Dataset):
     def __init__(self, task = 'disaster_types', split='train'):
         # self.phenotype = pd.read_csv( 

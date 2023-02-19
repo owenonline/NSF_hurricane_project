@@ -1,14 +1,13 @@
 import torch
 import pandas as pd
 import numpy as np
-from torch.utils.data import DataLoader, Dataset
-from torchvision import transforms, utils
+from torch.utils.data import Dataset
+from torchvision import transforms
 from PIL import Image
 import glob
 import os
 from PIL import ImageFile
 from sklearn.utils.class_weight import compute_class_weight
-from torchvision.io import read_image
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -17,43 +16,6 @@ def pil_loader(path):
     with open(path, 'rb') as f:
         img = Image.open(f)
         return img.convert('RGB')
-# read csv files
-# train_csv_type = 'crisis_vision_benchmarks/' \
-#             'tasks/disaster_types/consolidated/consolidated_disaster_types_train_final.tsv'
-# test_csv_type = 'crisis_vision_benchmarks/' \
-#             'tasks/disaster_types/consolidated/consolidated_disaster_types_test_final.tsv'
-# dev_csv_type = 'crisis_vision_benchmarks/' \
-#             'tasks/disaster_types/consolidated/consolidated_disaster_types_dev_final.tsv'
-
-# train_csv_damage = 'crisis_vision_benchmarks/' \
-#             'tasks/damage_severity/consolidated/consolidated_damage_train_final.tsv'
-# test_csv_damage = 'crisis_vision_benchmarks/' \
-#             'tasks/damage_severity/consolidated/consolidated_damage_test_final.tsv'
-# dev_csv_damage = 'crisis_vision_benchmarks/' \
-#             'tasks/damage_severity/consolidated/consolidated_damage_dev_final.tsv'
-
-# train_csv_humanitarian = 'crisis_vision_benchmarks/' \
-#             'tasks/humanitarian/consolidated/consolidated_hum_train_final.tsv'
-# test_csv_humanitarian = 'crisis_vision_benchmarks/' \
-#             'tasks/humanitarian/consolidated/consolidated_hum_test_final.tsv'
-# dev_csv_humanitarian = 'crisis_vision_benchmarks/' \
-#             'tasks/humanitarian/consolidated/consolidated_hum_dev_final.tsv'
-
-# train_csv_informative = 'crisis_vision_benchmarks/' \
-#             'tasks/informative/consolidated/consolidated_info_train_final.tsv'
-# test_csv_informative = 'crisis_vision_benchmarks/' \
-#             'tasks/informative/consolidated/consolidated_info_test_final.tsv'
-# dev_csv_informative = 'crisis_vision_benchmarks/' \
-#             'tasks/informative/consolidated/consolidated_info_dev_final.tsv'
-
-# phenotype = {
-#     'train': train_csv,
-#     'test': test_csv,
-#     'dev': dev_csv,
-# }
-
-# mapping label to id
-
 
 class DisasterDataset(Dataset):
     def __init__(self, task = 'disaster_types', split='train'):
@@ -98,9 +60,7 @@ class DisasterDataset(Dataset):
         class_label = self.phenotypes['class_label'].to_numpy()
         self.num_classes = np.unique(class_label)
         self.class_weights=compute_class_weight(class_weight='balanced',classes=self.num_classes,y=class_label)
-        # normalize = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
+        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         if split == 'train':
         
 
@@ -130,32 +90,19 @@ class DisasterDataset(Dataset):
         return int(self.phenotypes.shape[0])
 
     def __getitem__(self, idx):
-        # import pdb; pdb.set_trace()
         img_path = self.phenotypes['image_path'].iloc[idx]
         img_path = img_path.replace('/export/sc2/aidr/experiments/exp_crisisdps_image/','')
-        # try:
-        # image = Image.open('crisis_vision_benchmarks/{}'.format(img_path)) 
+
         image = pil_loader('crisis_vision_benchmarks/{}'.format(img_path))
-        # print(img_path)
-        # print(image.size)
-        # print(image.shape)
-        # image = image.convert('RGB')
-        # image = read_image('crisis_vision_benchmarks/{}'.format(img_path))
-        # # except:
-            # print(img_path)
         
         image = self.transforms(image)
-        # print(image)
         # image = image.float()
         # image = image / 255.0
-        # try:
+
         # if image.shape[0] >3:
         #     image = image[:3,:]
         
         # image = image - self._mean
-        # except:
-        # print(image.shape)
-        # print(self._mean.shape)
         # image = image / self._std
 
         type = self.phenotypes['class_label'].iloc[idx]

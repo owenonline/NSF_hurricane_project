@@ -33,7 +33,6 @@ criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(),lr=1e-2)
 lr_scheduler  = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max',patience=10)
 
-
 train_set = DisasterDataset(split='train')
 train_loader = DataLoader(train_set, batch_size=128, num_workers = 8, pin_memory=True)
 

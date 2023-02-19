@@ -115,7 +115,7 @@ for task in tasks:
                preds = model(img)
                correct += (torch.argmax(preds,1)==label).sum()
             best_test_acc = correct/len(test_set)
-         with open('out/output_multi_{}.txt'.format(sys.argv[1]),'a') as f:
+         with open('out/output_multi_{}_{}{}{}.txt'.format(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]),'a') as f:
             curr_lr = [group['lr'] for group in lr_scheduler.optimizer.param_groups][0]
             f.write(task+'epoch: '+str(ep) + '_test:'+str(best_test_acc) + '_val:'+str(val_acc)+ '_train:'+str(train_acc)+'_lr:'+str(curr_lr)+'\n')
       if sys.argv[4] == 2:

@@ -9,6 +9,8 @@ from gsam import GSAM, LinearScheduler
 
 #import resnet_example
 
+sys.argv[2:] = [int(x) for x in sys.argv[2:]]
+
 # ===========================
 epochs = 100
 

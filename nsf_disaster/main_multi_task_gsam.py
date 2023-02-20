@@ -18,6 +18,8 @@ def smooth_crossentropy(pred, gold, smoothing=0.1):
     return F.kl_div(input=log_prob, target=one_hot, reduction='none').sum(-1)
 #import resnet_example
 
+sys.argv[2:] = [int(x) for x in sys.argv[2:]]
+
 # ===========================
 epochs = 100
 

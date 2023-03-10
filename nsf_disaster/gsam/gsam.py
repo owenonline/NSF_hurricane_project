@@ -41,7 +41,7 @@ class GSAM(torch.optim.Optimizer):
     @torch.no_grad()
     def perturb_weights(self, rho=0.0):
         grad_norm = self._grad_norm( weight_adaptive = self.adaptive )
-        e_ws = []
+        # e_ws = []
         for group in self.param_groups:
             scale = rho / (grad_norm + self.perturb_eps)
 
@@ -51,12 +51,12 @@ class GSAM(torch.optim.Optimizer):
                 e_w = p.grad * scale.to(p)
                 if self.adaptive:
                     e_w *= torch.pow(p, 2)
-                e_ws.append(e_w.cpu())
-                print(e_w.cpu())
+                # e_ws.append(e_w.cpu())
+                # print(e_w.cpu())
                 p.add_(e_w)  # climb to the local maximum "w + e(w)"
                 self.state[p]['e_w'] = e_w
-        e_ws = np.array(e_ws)
-        print(f"Perturbed stats- mean: {np.mean(e_ws)}, std: {np.std(e_ws)}, median: {np.median(e_ws)}")
+        # e_ws = np.array(e_ws)
+        # print(f"Perturbed stats- mean: {np.mean(e_ws)}, std: {np.std(e_ws)}, median: {np.median(e_ws)}")
                 
     @torch.no_grad()
     def unperturb(self):
@@ -84,15 +84,15 @@ class GSAM(torch.optim.Optimizer):
         cosine = inner_prod / (new_grad_norm * old_grad_norm + self.perturb_eps)
 
         # gradient decomposition
-        verticals = []
+        # verticals = []
         for group in self.param_groups:
             for p in group['params']:
                 if p.grad is None: continue
                 vertical = self.state[p]['old_g'] - cosine * old_grad_norm * p.grad.data / (new_grad_norm + self.perturb_eps)
-                verticals.append(vertical.cpu())
+                # verticals.append(vertical.cpu())
                 p.grad.data.add_( vertical, alpha=-alpha)
-        verticals = np.array(verticals)
-        print(f"Vertical stats- mean: {np.mean(verticals)}, std: {np.std(verticals)}, median: {np.median(verticals)}")
+        # verticals = np.array(verticals)
+        # print(f"Vertical stats- mean: {np.mean(verticals)}, std: {np.std(verticals)}, median: {np.median(verticals)}")
 
     @torch.no_grad()
     def _sync_grad(self):

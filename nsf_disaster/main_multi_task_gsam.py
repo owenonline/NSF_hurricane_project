@@ -25,12 +25,12 @@ epochs = 100
 
 # tasks = ['disaster_types','damage_severity','humanitarian','informative']
 # tasks = ['humanitarian','informative']
-tasks = ['disaster_types']
+tasks = ['disaster_types', 'damage_severity']
 for task in tasks:
+   print(task)
 
-   train_set = DisasterDataset(task = task,split='train')
+   train_set = DisasterDataset(task=task, split='train')
    train_loader = DataLoader(train_set, batch_size=64, pin_memory=True, shuffle=True, num_workers=8)
-
 
    test_set = DisasterDataset(task = task,split='test')
    test_loader = DataLoader(test_set, batch_size=4,pin_memory=True, num_workers=8)
@@ -89,14 +89,13 @@ for task in tasks:
    # import pdb; pdb.set_trace()
    best_val_acc, best_test_acc =  .0, .0
    for ep in range(epochs):
-      print(ep)
+      # print(ep)
       correct = 0
       model.train()
-      for id, batch in tqdm(enumerate(train_loader)):
+      for id, batch in enumerate(train_loader):
          img, label = batch
          label = label.long()
          img, label = img.cuda(), label.cuda()
-
 
          def loss_fn(predictions, targets):
             return smooth_crossentropy(predictions, targets, smoothing=label_smoothing).mean()
@@ -104,6 +103,8 @@ for task in tasks:
          gsam_optimizer.set_closure(loss_fn, img, label)
 
          preds, loss = gsam_optimizer.step()
+
+         print(f"rho: {gsam_optimizer.rho_t}, ")
 
          with torch.no_grad():
             correct += (torch.argmax(preds,1)==label).sum()
@@ -118,7 +119,7 @@ for task in tasks:
       model.eval()
       with torch.no_grad():
          correct = 0
-         for id, batch in tqdm(enumerate(dev_loader)):
+         for id, batch in enumerate(dev_loader):
             img, label = batch
             label = label.long()
             img, label = img.cuda(), label.cuda()
@@ -129,7 +130,7 @@ for task in tasks:
          if val_acc > best_val_acc:
             best_val_acc = val_acc # this was missing here originally
             correct = 0
-            for id, batch in tqdm(enumerate(test_loader)):
+            for id, batch in enumerate(test_loader):
                img, label = batch
                label = label.long()
                img, label = img.cuda(), label.cuda()

@@ -52,6 +52,7 @@ class GSAM(torch.optim.Optimizer):
                 if self.adaptive:
                     e_w *= torch.pow(p, 2)
                 e_ws.append(e_w.cpu())
+                print(e_w.cpu())
                 p.add_(e_w)  # climb to the local maximum "w + e(w)"
                 self.state[p]['e_w'] = e_w
         e_ws = np.array(e_ws)

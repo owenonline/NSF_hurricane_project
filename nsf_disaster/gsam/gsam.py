@@ -51,7 +51,7 @@ class GSAM(torch.optim.Optimizer):
                 e_w = p.grad * scale.to(p)
                 if self.adaptive:
                     e_w *= torch.pow(p, 2)
-                e_ws.append(e_w)
+                e_ws.append(e_w.cpu())
                 p.add_(e_w)  # climb to the local maximum "w + e(w)"
                 self.state[p]['e_w'] = e_w
         e_ws = np.array(e_ws)
@@ -88,7 +88,7 @@ class GSAM(torch.optim.Optimizer):
             for p in group['params']:
                 if p.grad is None: continue
                 vertical = self.state[p]['old_g'] - cosine * old_grad_norm * p.grad.data / (new_grad_norm + self.perturb_eps)
-                verticals.append(vertical)
+                verticals.append(vertical.cpu())
                 p.grad.data.add_( vertical, alpha=-alpha)
         verticals = np.array(verticals)
         print(f"Vertical stats- mean: {np.mean(verticals)}, std: {np.std(verticals)}, median: {np.median(verticals)}")
